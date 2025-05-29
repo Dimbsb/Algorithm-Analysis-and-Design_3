@@ -1,11 +1,14 @@
+// Prim-2010-2037
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define SIZE 40
 #define V 30
 
+// Structs
 struct queue
 {
     int items[SIZE];
@@ -16,7 +19,7 @@ struct queue
 struct queue *createQueue();
 void enqueue(struct queue *q, int value);
 int dequeue(struct queue *q, int key[]);
-//void printQueue(struct queue *q);
+// void printQueue(struct queue *q);
 
 struct node
 {
@@ -26,22 +29,28 @@ struct node
 };
 
 struct node *createNode(int v, int weight);
+
 struct Graph
 {
-    int numVertices;
+    int NumberOfVertices;
     struct node **adjLists;
     int *visited;
 };
 
 struct Graph *createGraph(int vertices);
+
 void addEdge(struct Graph *graph, int src, int dest, int weight);
 
-// ΑΠΟ ΒΙΒΛΙΟ ΣΕΛ 630
-void Prim(struct Graph *graph, int startVertex)
+void freeGraph(struct Graph *graph);
+void freeQueue(struct queue *q);
+
+// Prim algorithm
+void Prim(struct Graph *graph)
 {
     int parent[V];
     int key[V];
-    
+    int startVertex = 0;
+
     for (int i = 0; i < V; i++)
     {
         key[i] = INT_MAX;
@@ -49,15 +58,15 @@ void Prim(struct Graph *graph, int startVertex)
     }
 
     key[startVertex] = 0;
- 
+
     struct queue *q = createQueue();
 
     enqueue(q, startVertex);
-    //printQueue(q);
-    while (q->front != -1)
+    // printQueue(q);
+    while (q->rear != -1)
     {
         int u = dequeue(q, key);
-        //printQueue(q);
+        // printQueue(q);
         graph->visited[u] = 1;
 
         struct node *temp = graph->adjLists[u];
@@ -70,7 +79,6 @@ void Prim(struct Graph *graph, int startVertex)
                 key[v] = temp->weight;
                 parent[v] = u;
                 enqueue(q, v);
-                //printQueue(q);
             }
             temp = temp->next;
         }
@@ -78,41 +86,36 @@ void Prim(struct Graph *graph, int startVertex)
     printf("Edge \tWeight\n");
     for (int i = 1; i < V; i++)
     {
-        struct node *temp = graph->adjLists[i];
-        while (temp)
-        {
-            if (temp->vertex == parent[i])
-            {
-                printf("%d - %d \t%d\n", parent[i], i, temp->weight);
-                break;
-            }
-            temp = temp->next;
-        }
+        if (parent[i] != -1)
+            printf("%d - %d\t%d\n", parent[i], i, key[i]);
     }
+    freeQueue(q);
 }
 
+// Main function
 int main()
 {
 
-//https://www.geeksforgeeks.org/prims-mst-for-adjacency-list-representation-greedy-algo-6/ 
-    struct Graph *graph = createGraph(V);
+    clock_t start, end;
+    double cpu_time_used;
 
-    addEdge(graph, 0, 1, 4);
-    addEdge(graph, 0, 7, 8);
-    addEdge(graph, 1, 2, 8);
-    addEdge(graph, 1, 7, 11);
-    addEdge(graph, 2, 3, 7);
-    addEdge(graph, 2, 8, 2);
-    addEdge(graph, 2, 5, 4);
-    addEdge(graph, 3, 4, 9);
-    addEdge(graph, 3, 5, 14);
-    addEdge(graph, 4, 5, 10);
-    addEdge(graph, 5, 6, 2);
-    addEdge(graph, 6, 7, 1);
-    addEdge(graph, 6, 8, 6);
-    addEdge(graph, 7, 8, 7);
+    // Example 1
+    struct Graph *graph1 = createGraph(V);
+    addEdge(graph1, 0, 1, 2);
+    addEdge(graph1, 0, 3, 6);
+    addEdge(graph1, 1, 2, 3);
+    addEdge(graph1, 1, 3, 8);
+    addEdge(graph1, 1, 4, 5);
+    addEdge(graph1, 2, 4, 7);
+    addEdge(graph1, 3, 4, 9);
 
-    Prim(graph, 0);
+    start = clock();
+    Prim(graph1);
+    end = clock();
+    cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("EXECUTION TIME FOR GRAPH - 1 WITH 5 NODES IS: %.6lf SECONDS\n\n", cpu_time_used);
+    freeGraph(graph1);
+
 
     return 0;
 }
@@ -132,7 +135,7 @@ struct Graph *createGraph(int vertices)
 {
     int i;
     struct Graph *graph = malloc(sizeof(struct Graph));
-    graph->numVertices = vertices;
+    graph->NumberOfVertices = vertices;
     graph->adjLists = malloc(vertices * sizeof(struct node *));
     graph->visited = malloc(vertices * sizeof(int));
     for (i = 0; i < vertices; i++)
@@ -149,6 +152,7 @@ void addEdge(struct Graph *graph, int src, int dest, int weight)
     struct node *newNode = createNode(dest, weight);
     newNode->next = graph->adjLists[src];
     graph->adjLists[src] = newNode;
+
     newNode = createNode(src, weight);
     newNode->next = graph->adjLists[dest];
     graph->adjLists[dest] = newNode;
@@ -202,6 +206,28 @@ int dequeue(struct queue *q, int key[])
         q->front = q->rear = -1;
 
     return minimumVertex;
+}
+
+void freeGraph(struct Graph *graph)
+{
+    for (int i = 0; i < graph->NumberOfVertices; i++)
+    {
+        struct node *temp = graph->adjLists[i];
+        while (temp)
+        {
+            struct node *next = temp->next;
+            free(temp);
+            temp = next;
+        }
+    }
+    free(graph->adjLists);
+    free(graph->visited);
+    free(graph);
+}
+
+void freeQueue(struct queue *q)
+{
+    free(q);
 }
 
 /*
