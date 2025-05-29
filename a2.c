@@ -6,7 +6,7 @@
 #include <string.h>
 #include <time.h>
 
-#define V 30
+#define V 100
 
 struct node
 {
@@ -28,7 +28,7 @@ struct node *createNode(int v, int weight);
 struct Graph
 {
     int NumberOfVertices;
-    struct node **adjLists;
+    struct node **AdjacencyList;
     int *visited;
     struct Edge *edges;
     int edgeCounter;
@@ -119,13 +119,13 @@ struct Graph *createGraph(int vertices)
     int i;
     struct Graph *graph = malloc(sizeof(struct Graph));
     graph->NumberOfVertices = vertices;
-    graph->adjLists = malloc(vertices * sizeof(struct node *));
+    graph->AdjacencyList = malloc(vertices * sizeof(struct node *));
     graph->visited = malloc(vertices * sizeof(int));
     graph->edges = malloc(vertices * vertices * sizeof(struct Edge));  
     graph->edgeCounter = 0;  
     for (i = 0; i < vertices; i++)
     {
-        graph->adjLists[i] = NULL;
+        graph->AdjacencyList[i] = NULL;
         graph->visited[i] = 0;
     }
     return graph;
@@ -134,12 +134,12 @@ struct Graph *createGraph(int vertices)
 // AddEdge
 void addEdge(struct Graph *graph, int src, int dest, int weight) {
     struct node *newNode = createNode(dest, weight);
-    newNode->next = graph->adjLists[src];
-    graph->adjLists[src] = newNode;
+    newNode->next = graph->AdjacencyList[src];
+    graph->AdjacencyList[src] = newNode;
 
     newNode = createNode(src, weight);
-    newNode->next = graph->adjLists[dest];
-    graph->adjLists[dest] = newNode;
+    newNode->next = graph->AdjacencyList[dest];
+    graph->AdjacencyList[dest] = newNode;
 
     // Edge list 
     if (src < dest) {

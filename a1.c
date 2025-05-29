@@ -5,8 +5,8 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define SIZE 40
-#define V 30
+#define SIZE 100
+#define V 100
 
 // Structs
 struct queue
@@ -33,14 +33,13 @@ struct node *createNode(int v, int weight);
 struct Graph
 {
     int NumberOfVertices;
-    struct node **adjLists;
+    struct node **AdjacencyList;
     int *visited;
 };
 
 struct Graph *createGraph(int vertices);
 
 void addEdge(struct Graph *graph, int src, int dest, int weight);
-
 void freeGraph(struct Graph *graph);
 void freeQueue(struct queue *q);
 
@@ -69,7 +68,7 @@ void Prim(struct Graph *graph)
         // printQueue(q);
         graph->visited[u] = 1;
 
-        struct node *temp = graph->adjLists[u];
+        struct node *temp = graph->AdjacencyList[u];
         while (temp)
         {
             int v = temp->vertex;
@@ -136,11 +135,11 @@ struct Graph *createGraph(int vertices)
     int i;
     struct Graph *graph = malloc(sizeof(struct Graph));
     graph->NumberOfVertices = vertices;
-    graph->adjLists = malloc(vertices * sizeof(struct node *));
+    graph->AdjacencyList = malloc(vertices * sizeof(struct node *));
     graph->visited = malloc(vertices * sizeof(int));
     for (i = 0; i < vertices; i++)
     {
-        graph->adjLists[i] = NULL;
+        graph->AdjacencyList[i] = NULL;
         graph->visited[i] = 0;
     }
     return graph;
@@ -150,12 +149,12 @@ struct Graph *createGraph(int vertices)
 void addEdge(struct Graph *graph, int src, int dest, int weight)
 {
     struct node *newNode = createNode(dest, weight);
-    newNode->next = graph->adjLists[src];
-    graph->adjLists[src] = newNode;
+    newNode->next = graph->AdjacencyList[src];
+    graph->AdjacencyList[src] = newNode;
 
     newNode = createNode(src, weight);
-    newNode->next = graph->adjLists[dest];
-    graph->adjLists[dest] = newNode;
+    newNode->next = graph->AdjacencyList[dest];
+    graph->AdjacencyList[dest] = newNode;
 }
 
 // Create queue
@@ -212,7 +211,7 @@ void freeGraph(struct Graph *graph)
 {
     for (int i = 0; i < graph->NumberOfVertices; i++)
     {
-        struct node *temp = graph->adjLists[i];
+        struct node *temp = graph->AdjacencyList[i];
         while (temp)
         {
             struct node *next = temp->next;
@@ -220,7 +219,7 @@ void freeGraph(struct Graph *graph)
             temp = next;
         }
     }
-    free(graph->adjLists);
+    free(graph->AdjacencyList);
     free(graph->visited);
     free(graph);
 }
