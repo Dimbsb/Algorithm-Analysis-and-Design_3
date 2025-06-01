@@ -40,6 +40,7 @@ void addEdge(struct Graph *graph, int src, int dest, int weight);
 void ConstructSet(int parent[], int rank[], int n);
 int FindSet(int parent[], int i);
 void Connection(int parent[], int rank[], int x, int y);
+void freeGraph(struct Graph *graph);
 
 void Kruskal(struct Graph *graph)
 {
@@ -62,6 +63,7 @@ void Kruskal(struct Graph *graph)
 
     printf("Edge \tWeight\n");
     int NumberOfEdges = 0;
+    int totalWeight = 0;
     for (int i = 0; NumberOfEdges < graph->NumberOfVertices - 1 && i < graph->edgeCounter; i++)
     {
         int u = FindSet(parent, graph->edges[i].src);
@@ -69,10 +71,12 @@ void Kruskal(struct Graph *graph)
         if (u != v)
         {
             printf("%d - %d \t%d\n", graph->edges[i].src, graph->edges[i].dest, graph->edges[i].weight);
+            totalWeight += graph->edges[i].weight;
             Connection(parent, rank, u, v);
             NumberOfEdges++;
         }
     }
+    printf("Total weight of MST: %d\n", totalWeight);
 }
 
 
@@ -82,23 +86,30 @@ int main()
     clock_t start, end;
     double cpu_time_used;
 
-    // Example 2
-    struct Graph *graph2 = createGraph(V);
-    addEdge(graph2, 0, 1, 10);
-    addEdge(graph2, 0, 2, 6);
-    addEdge(graph2, 0, 3, 5);
-    addEdge(graph2, 1, 3, 15);
-    addEdge(graph2, 1, 2, 4);
-    addEdge(graph2, 2, 3, 2);
-    addEdge(graph2, 3, 4, 3);
-    addEdge(graph2, 4, 5, 1);
-    addEdge(graph2, 5, 6, 8);
+    // Example 1...8 Nodes
+    struct Graph *graph1 = createGraph(V);
+    addEdge(graph1, 0, 1, 4);
+    addEdge(graph1, 0, 7, 8);
+    addEdge(graph1, 1, 2, 8);
+    addEdge(graph1, 1, 7, 11);
+    addEdge(graph1, 2, 3, 7);
+    addEdge(graph1, 2, 8, 2);
+    addEdge(graph1, 2, 5, 4);
+    addEdge(graph1, 3, 4, 9);
+    addEdge(graph1, 3, 5, 14);
+    addEdge(graph1, 4, 5, 10);
+    addEdge(graph1, 5, 6, 2);
+    addEdge(graph1, 6, 7, 1);
+    addEdge(graph1, 6, 8, 6);
+    addEdge(graph1, 7, 8, 7);
+ 
 
     start = clock();
-    Kruskal(graph2);
+    Kruskal(graph1);
     end = clock();
     cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("EXECUTION TIME FOR GRAPH - 2 IS: %.6lf SECONDS\n\n", cpu_time_used);
+    printf("EXECUTION TIME FOR GRAPH - 1 WITH KRUSKAL IS: %.6lf SECONDS\n\n", cpu_time_used);
+    freeGraph(graph1);
 
     return 0;
 }
@@ -193,3 +204,17 @@ void Connection(int parent[], int rank[], int x, int y)
     }
 }
 
+void freeGraph(struct Graph *graph) {
+    for (int i = 0; i < graph->NumberOfVertices; i++) {
+        struct node *temp = graph->AdjacencyList[i];
+        while (temp) {
+            struct node *next = temp->next;
+            free(temp);
+            temp = next;
+        }
+    }
+    free(graph->AdjacencyList);
+    free(graph->visited);
+    free(graph->edges);
+    free(graph);
+}

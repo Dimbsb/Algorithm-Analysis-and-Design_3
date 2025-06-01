@@ -61,7 +61,7 @@ void Prim(struct Graph *graph)
     struct queue *q = createQueue();
 
     enqueue(q, startVertex);
-    while (q->rear != -1)
+    while (q->front != -1)
     {
         int u = dequeue(q, key);
         graph->visited[u] = 1;
@@ -80,16 +80,17 @@ void Prim(struct Graph *graph)
             temp = temp->next;
         }
     }
-    printf("Edge \tWeight\n");
+    printf("EDGE BETWEEN NODES: \tWEIGHT\n");
     int totalWeight = 0;
-    for (int i = 1; i < graph->NumberOfVertices;  i++)
+    for (int i = 1; i < graph->NumberOfVertices; i++)
     {
-        if (parent[i] != -1) {
-            printf("%d - %d\t%d\n", parent[i], i, key[i]);
+        if (parent[i] != -1)
+        {
+            printf("%d - %d\t\t\t%d\n", parent[i], i, key[i]);
             totalWeight += key[i];
         }
     }
-    printf("Total weight of MST: %d\n", totalWeight);
+    printf("TOTAL WEIGHT IS: %d\n", totalWeight);
     freeQueue(q);
 }
 
@@ -100,23 +101,31 @@ int main()
     clock_t start, end;
     double cpu_time_used;
 
-    // Example 1
+    // Example 1...8 Nodes
     struct Graph *graph1 = createGraph(V);
-    addEdge(graph1, 0, 1, 2);
-    addEdge(graph1, 0, 3, 6);
-    addEdge(graph1, 1, 2, 3);
-    addEdge(graph1, 1, 3, 8);
-    addEdge(graph1, 1, 4, 5);
-    addEdge(graph1, 2, 4, 7);
+    addEdge(graph1, 0, 1, 4);
+    addEdge(graph1, 0, 7, 8);
+    addEdge(graph1, 1, 2, 8);
+    addEdge(graph1, 1, 7, 11);
+    addEdge(graph1, 2, 3, 7);
+    addEdge(graph1, 2, 8, 2);
+    addEdge(graph1, 2, 5, 4);
     addEdge(graph1, 3, 4, 9);
+    addEdge(graph1, 3, 5, 14);
+    addEdge(graph1, 4, 5, 10);
+    addEdge(graph1, 5, 6, 2);
+    addEdge(graph1, 6, 7, 1);
+    addEdge(graph1, 6, 8, 6);
+    addEdge(graph1, 7, 8, 7);
 
     start = clock();
     Prim(graph1);
     end = clock();
     cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("EXECUTION TIME FOR GRAPH - 1 WITH 5 NODES IS: %.6lf SECONDS\n\n", cpu_time_used);
+    printf("EXECUTION TIME FOR GRAPH - 1 WITH PRIM IS: %.6lf SECONDS\n\n", cpu_time_used);
     freeGraph(graph1);
- 
+
+
     return 0;
 }
 
@@ -174,8 +183,9 @@ void enqueue(struct queue *q, int value)
         printf("\nQueue is Full!!");
     else
     {
-        if (q->front == -1)
+        if (q->front == -1){
             q->front = 0;
+        }
         q->rear++;
         q->items[q->rear] = value;
     }
@@ -194,16 +204,22 @@ int dequeue(struct queue *q, int key[])
     for (int i = q->front + 1; i <= q->rear; i++)
     {
         if (key[q->items[i]] < key[q->items[minimumIndex]])
+        {
             minimumIndex = i;
+        }
     }
 
     int minimumVertex = q->items[minimumIndex];
 
     for (int i = minimumIndex; i < q->rear; i++)
+    {
         q->items[i] = q->items[i + 1];
+    }
     q->rear--;
     if (q->rear < q->front)
+    {
         q->front = q->rear = -1;
+    }
 
     return minimumVertex;
 }
