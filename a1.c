@@ -61,11 +61,9 @@ void Prim(struct Graph *graph)
     struct queue *q = createQueue();
 
     enqueue(q, startVertex);
-    // printQueue(q);
     while (q->rear != -1)
     {
         int u = dequeue(q, key);
-        // printQueue(q);
         graph->visited[u] = 1;
 
         struct node *temp = graph->AdjacencyList[u];
@@ -83,11 +81,15 @@ void Prim(struct Graph *graph)
         }
     }
     printf("Edge \tWeight\n");
-    for (int i = 1; i < V; i++)
+    int totalWeight = 0;
+    for (int i = 1; i < graph->NumberOfVertices;  i++)
     {
-        if (parent[i] != -1)
+        if (parent[i] != -1) {
             printf("%d - %d\t%d\n", parent[i], i, key[i]);
+            totalWeight += key[i];
+        }
     }
+    printf("Total weight of MST: %d\n", totalWeight);
     freeQueue(q);
 }
 
@@ -114,8 +116,7 @@ int main()
     cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
     printf("EXECUTION TIME FOR GRAPH - 1 WITH 5 NODES IS: %.6lf SECONDS\n\n", cpu_time_used);
     freeGraph(graph1);
-
-
+ 
     return 0;
 }
 
