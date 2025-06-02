@@ -5,22 +5,9 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define SIZE 100
-#define V 100
+#define SIZE INT_MAX // Or dynamically allocate
 
 // Structs
-struct queue
-{
-    int items[SIZE];
-    int front;
-    int rear;
-};
-
-struct queue *createQueue();
-void enqueue(struct queue *q, int value);
-int dequeue(struct queue *q, int key[]);
-// void printQueue(struct queue *q);
-
 struct node
 {
     int vertex;
@@ -39,18 +26,31 @@ struct Graph
 
 struct Graph *createGraph(int vertices);
 
+struct queue
+{
+    int items[SIZE];
+    int front;
+    int rear;
+};
+
 void addEdge(struct Graph *graph, int src, int dest, int weight);
+struct queue *createQueue();
+void enqueue(struct queue *q, int value);
+int dequeue(struct queue *q, int key[]);
+void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOfEdges, unsigned int seed, int maxWeight); 
+void printGraph(struct Graph *graph);
 void freeGraph(struct Graph *graph);
 void freeQueue(struct queue *q);
+// void printQueue(struct queue *q);
 
 // Prim algorithm
 void Prim(struct Graph *graph)
 {
-    int parent[V];
-    int key[V];
+    int *parent = malloc(graph->NumberOfVertices * sizeof(int));
+    int *key = malloc(graph->NumberOfVertices * sizeof(int));
     int startVertex = 0;
 
-    for (int i = 0; i < V; i++)
+    for (int i = 0; i < graph->NumberOfVertices; i++)
     {
         key[i] = INT_MAX;
         parent[i] = -1;
@@ -92,40 +92,32 @@ void Prim(struct Graph *graph)
     }
     printf("TOTAL WEIGHT IS: %d\n", totalWeight);
     freeQueue(q);
+    free(parent);
+    free(key);
 }
 
 // Main function
 int main()
 {
-
     clock_t start, end;
     double cpu_time_used;
 
-    // Example 1...8 Nodes
-    struct Graph *graph1 = createGraph(V);
-    addEdge(graph1, 0, 1, 4);
-    addEdge(graph1, 0, 7, 8);
-    addEdge(graph1, 1, 2, 8);
-    addEdge(graph1, 1, 7, 11);
-    addEdge(graph1, 2, 3, 7);
-    addEdge(graph1, 2, 8, 2);
-    addEdge(graph1, 2, 5, 4);
-    addEdge(graph1, 3, 4, 9);
-    addEdge(graph1, 3, 5, 14);
-    addEdge(graph1, 4, 5, 10);
-    addEdge(graph1, 5, 6, 2);
-    addEdge(graph1, 6, 7, 1);
-    addEdge(graph1, 6, 8, 6);
-    addEdge(graph1, 7, 8, 7);
+    int NumberOfVertices = 10000;         
+    int NumberOfEdges = 20000;            
+    unsigned int seed = 20;  
+    int maxWeight = 20;
+    srand(seed);
+
+    struct Graph *graph1 = createGraph(NumberOfVertices);
+    generateRandomGraph(graph1, NumberOfVertices, NumberOfEdges, seed, maxWeight);
+    printGraph(graph1);
 
     start = clock();
     Prim(graph1);
     end = clock();
     cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("EXECUTION TIME FOR GRAPH - 1 WITH PRIM IS: %.6lf SECONDS\n\n", cpu_time_used);
+    printf("EXECUTION TIME FOR PRIM'S ALGORITHM IS: %.6lf SECONDS\n", cpu_time_used);
     freeGraph(graph1);
-
-
     return 0;
 }
 
@@ -183,7 +175,8 @@ void enqueue(struct queue *q, int value)
         printf("\nQueue is Full!!");
     else
     {
-        if (q->front == -1){
+        if (q->front == -1)
+        {
             q->front = 0;
         }
         q->rear++;
@@ -224,6 +217,73 @@ int dequeue(struct queue *q, int key[])
     return minimumVertex;
 }
 
+void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOfEdges, unsigned int seed, int maxWeight)
+{
+ 
+    // Step 1: Ensure connectivity with a spanning tree
+    for (int i = 1; i < NumberOfVertices; i++)
+    {
+        int j = rand() % i; // connect to an existing node
+        int weight = rand() % maxWeight + 1;
+        addEdge(graph, i, j, weight);
+    }
+
+    // Step 2: Add remaining edges randomly (use a simple 1D edge lookup)
+    int RemainingEdges = NumberOfEdges - (NumberOfVertices - 1);
+    int added = 0;
+
+    while (added < RemainingEdges)
+    {
+        int u = rand() % NumberOfVertices;
+        int v = rand() % NumberOfVertices;
+
+        if (u == v) {
+            continue;
+        }
+
+        // Check if edge already exists
+        struct node *temp = graph->AdjacencyList[u];
+        bool exists = false;
+        while (temp)
+        {
+            if (temp->vertex == v)
+            {
+                exists = true;
+                break;
+            }
+            temp = temp->next;
+        }
+
+        if (!exists)
+        {
+            int weight = rand() % maxWeight + 1;
+            addEdge(graph, u, v, weight);
+            added++;
+        }
+    }
+}
+
+
+ 
+
+
+
+void printGraph(struct Graph *graph)
+{
+    printf("Graph adjacency list:\n");
+    for (int i = 0; i < graph->NumberOfVertices; i++)
+    {
+        printf("%d:", i);
+        struct node *temp = graph->AdjacencyList[i];
+        while (temp)
+        {
+            printf(" -> (%d, w=%d)", temp->vertex, temp->weight);
+            temp = temp->next;
+        }
+        printf("\n");
+    }
+}
+
 void freeGraph(struct Graph *graph)
 {
     for (int i = 0; i < graph->NumberOfVertices; i++)
@@ -245,6 +305,7 @@ void freeQueue(struct queue *q)
 {
     free(q);
 }
+
 
 /*
 void printQueue(struct queue *q)
