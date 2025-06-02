@@ -42,6 +42,7 @@ int compareEdges(const void *a, const void *b);
 void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOfEdges, unsigned int seed, int maxWeight);
 void freeGraph(struct Graph *graph);
 
+// Kruskal's algorithm
 void Kruskal(struct Graph *graph)
 {
     int *parent = malloc(graph->NumberOfVertices * sizeof(int));
@@ -71,6 +72,8 @@ void Kruskal(struct Graph *graph)
     free(rank);
 }
 
+
+// Main function
 int main()
 {
     clock_t start, end;
@@ -191,6 +194,7 @@ void Connection(int parent[], int rank[], int x, int y)
     }
 }
 
+// Compare edges for qsort
 int compareEdges(const void *a, const void *b)
 {
     const struct Edge *e1 = (const struct Edge *)a;
@@ -198,53 +202,49 @@ int compareEdges(const void *a, const void *b)
     return e1->weight - e2->weight;
 }
 
-// GenerateRandomGraph
+// Generate random graph
 void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOfEdges, unsigned int seed, int maxWeight)
 {
-    srand(seed);
-
-    // Step 1: Ensure connectivity with a spanning tree
+ 
     for (int i = 1; i < NumberOfVertices; i++)
     {
-        int j = rand() % i; // connect to an existing node
+        int j = rand() % i;  
         int weight = rand() % maxWeight + 1;
         addEdge(graph, i, j, weight);
     }
 
-    // Step 2: Add remaining edges randomly (use a simple 1D edge lookup)
-    int extraEdges = NumberOfEdges - (NumberOfVertices - 1);
-    int added = 0;
+    int RemainingEdges = NumberOfEdges - (NumberOfVertices - 1);
+    int AddEdgeToGraph = 0;
 
-    while (added < extraEdges)
+    while (AddEdgeToGraph < RemainingEdges)
     {
         int u = rand() % NumberOfVertices;
         int v = rand() % NumberOfVertices;
 
-        if (u == v) continue; // no self-loops
+        if (u == v) {
+            continue;
+        }
 
-        // Check if edge already exists
         struct node *temp = graph->AdjacencyList[u];
-        bool exists = false;
+        bool EdgeInGraph = false;
         while (temp)
         {
             if (temp->vertex == v)
             {
-                exists = true;
+                EdgeInGraph = true;
                 break;
             }
             temp = temp->next;
         }
 
-        if (!exists)
+        if (!EdgeInGraph)
         {
             int weight = rand() % maxWeight + 1;
             addEdge(graph, u, v, weight);
-            added++;
+            AddEdgeToGraph++;
         }
     }
 }
-
-
 
 // FreeGraph
 void freeGraph(struct Graph *graph)

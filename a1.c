@@ -102,7 +102,7 @@ int main()
     clock_t start, end;
     double cpu_time_used;
 
-    int NumberOfVertices = 10000;         
+    int NumberOfVertices = 10000;          
     int NumberOfEdges = 20000;            
     unsigned int seed = 20;  
     int maxWeight = 20;
@@ -217,22 +217,21 @@ int dequeue(struct queue *q, int key[])
     return minimumVertex;
 }
 
+// Generate random graph
 void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOfEdges, unsigned int seed, int maxWeight)
 {
  
-    // Step 1: Ensure connectivity with a spanning tree
     for (int i = 1; i < NumberOfVertices; i++)
     {
-        int j = rand() % i; // connect to an existing node
+        int j = rand() % i;  
         int weight = rand() % maxWeight + 1;
         addEdge(graph, i, j, weight);
     }
 
-    // Step 2: Add remaining edges randomly (use a simple 1D edge lookup)
     int RemainingEdges = NumberOfEdges - (NumberOfVertices - 1);
-    int added = 0;
+    int AddEdgeToGraph = 0;
 
-    while (added < RemainingEdges)
+    while (AddEdgeToGraph < RemainingEdges)
     {
         int u = rand() % NumberOfVertices;
         int v = rand() % NumberOfVertices;
@@ -241,33 +240,29 @@ void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOf
             continue;
         }
 
-        // Check if edge already exists
         struct node *temp = graph->AdjacencyList[u];
-        bool exists = false;
+        bool EdgeInGraph = false;
         while (temp)
         {
             if (temp->vertex == v)
             {
-                exists = true;
+                EdgeInGraph = true;
                 break;
             }
             temp = temp->next;
         }
 
-        if (!exists)
+        if (!EdgeInGraph)
         {
             int weight = rand() % maxWeight + 1;
             addEdge(graph, u, v, weight);
-            added++;
+            AddEdgeToGraph++;
         }
     }
 }
 
 
- 
-
-
-
+// PrintGraph
 void printGraph(struct Graph *graph)
 {
     printf("Graph adjacency list:\n");
@@ -284,6 +279,7 @@ void printGraph(struct Graph *graph)
     }
 }
 
+// FreeGraph
 void freeGraph(struct Graph *graph)
 {
     for (int i = 0; i < graph->NumberOfVertices; i++)
@@ -301,6 +297,7 @@ void freeGraph(struct Graph *graph)
     free(graph);
 }
 
+// FreeQueue
 void freeQueue(struct queue *q)
 {
     free(q);
