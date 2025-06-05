@@ -78,6 +78,7 @@ int main()
 {
     clock_t start, end;
     double cpu_time_used;
+    int tests = 10;
 
     unsigned int seed = 20;
     int maxWeight = 20;
@@ -98,7 +99,7 @@ int main()
 
     // GRAPH 2
     int NumberOfVertices2 = 10;
-    int NumberOfEdges2 = 20;
+    int NumberOfEdges2 = 15;
     srand(seed);
     struct Graph *graph2 = createGraph(NumberOfVertices2);
     generateRandomGraph(graph2, NumberOfVertices2, NumberOfEdges2, seed, maxWeight);
@@ -126,7 +127,7 @@ int main()
 
     // GRAPH 4
     int NumberOfVertices4 = 20;
-    int NumberOfEdges4 = 30;
+    int NumberOfEdges4 = 25;
     srand(seed);
     struct Graph *graph4 = createGraph(NumberOfVertices4);
     generateRandomGraph(graph4, NumberOfVertices4, NumberOfEdges4, seed, maxWeight);
@@ -181,7 +182,6 @@ void addEdge(struct Graph *graph, int src, int dest, int weight)
     graph->AdjacencyList[dest] = newNode;
 
     // Edge list
-    // Always store with src < dest to avoid duplication
     if (src > dest)
     {
         int temp = src;
