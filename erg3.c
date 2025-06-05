@@ -27,6 +27,83 @@ struct Graph {
     int edgeCount;
 };
 
+struct node *createNode(int v, int weight);
+void addAdjEdge(struct Graph *graph, int src, int dest, int weight);
+void removeAdjEdge(struct Graph *graph, int src, int dest);
+struct Graph *createGraph(int vertices);
+void addEdge(struct Graph *graph, int src, int dest, int weight);
+void dfsConn(struct Graph *graph, int v);
+bool isConnected(struct Graph *graph);
+int compareEdges(const void *a, const void *b);
+void freeGraph(struct Graph *graph);
+void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOfEdges, unsigned int seed, int maxWeight);
+void printGraph(struct Graph *graph);
+
+/* --- reverse‐delete MST --- */
+
+/**
+ * Υλοποιεί τον αλγόριθμο Reverse‐Delete για MST:
+ * Ταξινομεί τις ακμές κατά φθίνουσα βαρών. Στη συνέχεια, βρόχος:
+ *   α) Αφαιρεί προσωρινά την ακμή (u,v) από τις adjacency‐lists.
+ *   β) Καλεί isConnected.  Αν επιστρέψει false, επαναφέρει την ακμή
+ *      και την κρατά στο MST. Διαφορετικά, την αφήνει κομμένη.
+ */
+void reverseDeleteMST(struct Graph *graph) {
+    qsort(graph->edges, graph->edgeCount, sizeof(struct Edge), compareEdges);
+
+    int totalWeight = 0;
+    printf("Edge   Weight\n");
+    for (int i = 0; i < graph->edgeCount; i++) {
+        int u = graph->edges[i].u;
+        int v = graph->edges[i].v;
+        int w = graph->edges[i].weight;
+
+        /* Προσωρινή αφαίρεση της ακμής από τις δύο λίστες */
+        removeAdjEdge(graph, u, v);
+        removeAdjEdge(graph, v, u);
+
+        if (!isConnected(graph)) {
+            /* Αν αποσυνδεθεί, επαναφέρουμε στο MST */
+            addAdjEdge(graph, u, v, w);
+            addAdjEdge(graph, v, u, w);
+            totalWeight += w;
+            printf("%2d - %2d    %d\n", u, v, w);
+        }
+        /* Διαφορετικά την αφήνουμε τελείως κομμένη (remote) */
+    }
+    printf("Total weight of MST = %d\n", totalWeight);
+}
+
+
+
+/* --- κύριο πρόγραμμα που συγκρίνει μετράει και reverse‐delete --- */
+
+int main(void) {
+    /* Παράμετροι τυχαίου γράφου */
+    int NumberOfVertices = 10;   // Αριθμός κορυφών
+    int NumberOfEdges    = 15;   // Σύνολο ακμών
+    unsigned int seed    = 20;      // Seed για rand()
+    int maxWeight        = 20;      // Μέγιστο βάρος ακμής
+
+    /* Δημιουργία κενού γράφου */
+    struct Graph *graph = createGraph(NumberOfVertices);
+
+    /* Γέμισμα με τυχαίες ακμές και εκτύπωση */
+    generateRandomGraph(graph, NumberOfVertices, NumberOfEdges, seed, maxWeight);
+    printGraph(graph);
+
+    /* Εκτέλεση Reverse‐Delete MST και μέτρηση χρόνου */
+    clock_t start = clock();
+    reverseDeleteMST(graph);
+    clock_t end = clock();
+
+    double cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("EXECUTION TIME FOR REVERSE-DELETE MST IS: %.6lf SECONDS\n", cpu_time_used);
+
+    freeGraph(graph);
+    return 0;
+}
+
 /* --- adjacency‐list helper functions --- */
 
 /**
@@ -136,41 +213,6 @@ int compareEdges(const void *a, const void *b) {
     return e2->weight - e1->weight;
 }
 
-/* --- reverse‐delete MST --- */
-
-/**
- * Υλοποιεί τον αλγόριθμο Reverse‐Delete για MST:
- * Ταξινομεί τις ακμές κατά φθίνουσα βαρών. Στη συνέχεια, βρόχος:
- *   α) Αφαιρεί προσωρινά την ακμή (u,v) από τις adjacency‐lists.
- *   β) Καλεί isConnected.  Αν επιστρέψει false, επαναφέρει την ακμή
- *      και την κρατά στο MST. Διαφορετικά, την αφήνει κομμένη.
- */
-void reverseDeleteMST(struct Graph *graph) {
-    qsort(graph->edges, graph->edgeCount, sizeof(struct Edge), compareEdges);
-
-    int totalWeight = 0;
-    printf("Edge   Weight\n");
-    for (int i = 0; i < graph->edgeCount; i++) {
-        int u = graph->edges[i].u;
-        int v = graph->edges[i].v;
-        int w = graph->edges[i].weight;
-
-        /* Προσωρινή αφαίρεση της ακμής από τις δύο λίστες */
-        removeAdjEdge(graph, u, v);
-        removeAdjEdge(graph, v, u);
-
-        if (!isConnected(graph)) {
-            /* Αν αποσυνδεθεί, επαναφέρουμε στο MST */
-            addAdjEdge(graph, u, v, w);
-            addAdjEdge(graph, v, u, w);
-            totalWeight += w;
-            printf("%2d - %2d    %d\n", u, v, w);
-        }
-        /* Διαφορετικά την αφήνουμε τελείως κομμένη (remote) */
-    }
-    printf("Total weight of MST = %d\n", totalWeight);
-}
-
 /**
  * Απελευθερώνει όλη τη δυναμική μνήμη του γράφου.
  */
@@ -251,32 +293,4 @@ void printGraph(struct Graph *graph) {
         }
         printf("\n");
     }
-}
-
-/* --- κύριο πρόγραμμα που συγκρίνει μετράει και reverse‐delete --- */
-
-int main(void) {
-    /* Παράμετροι τυχαίου γράφου */
-    int NumberOfVertices = 10;   // Αριθμός κορυφών
-    int NumberOfEdges    = 15;   // Σύνολο ακμών
-    unsigned int seed    = 20;      // Seed για rand()
-    int maxWeight        = 20;      // Μέγιστο βάρος ακμής
-
-    /* Δημιουργία κενού γράφου */
-    struct Graph *graph = createGraph(NumberOfVertices);
-
-    /* Γέμισμα με τυχαίες ακμές και εκτύπωση */
-    generateRandomGraph(graph, NumberOfVertices, NumberOfEdges, seed, maxWeight);
-    printGraph(graph);
-
-    /* Εκτέλεση Reverse‐Delete MST και μέτρηση χρόνου */
-    clock_t start = clock();
-    reverseDeleteMST(graph);
-    clock_t end = clock();
-
-    double cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("EXECUTION TIME FOR REVERSE-DELETE MST IS: %.6lf SECONDS\n", cpu_time_used);
-
-    freeGraph(graph);
-    return 0;
 }
