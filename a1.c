@@ -102,24 +102,68 @@ int main()
     clock_t start, end;
     double cpu_time_used;
 
-    int NumberOfVertices = 10000;          
-    int NumberOfEdges = 20000;            
-    unsigned int seed = 20;  
+    unsigned int seed = 20;
     int maxWeight = 20;
+
+    // GRAPH 1
+    int NumberOfVertices1 = 5;
+    int NumberOfEdges1 = 10;
     srand(seed);
-
-    struct Graph *graph1 = createGraph(NumberOfVertices);
-    generateRandomGraph(graph1, NumberOfVertices, NumberOfEdges, seed, maxWeight);
-    printGraph(graph1);
-
+    struct Graph *graph1 = createGraph(NumberOfVertices1);
+    generateRandomGraph(graph1, NumberOfVertices1, NumberOfEdges1, seed, maxWeight);
+    printf("\nGRAPH 1: %d vertices, %d edges\n", NumberOfVertices1, NumberOfEdges1);
     start = clock();
     Prim(graph1);
     end = clock();
     cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("EXECUTION TIME FOR PRIM'S ALGORITHM IS: %.6lf SECONDS\n", cpu_time_used);
+    printf("Execution time: %.6lf seconds\n", cpu_time_used);
     freeGraph(graph1);
+
+    // GRAPH 2
+    int NumberOfVertices2 = 10;
+    int NumberOfEdges2 = 20;
+    srand(seed);
+    struct Graph *graph2 = createGraph(NumberOfVertices2);
+    generateRandomGraph(graph2, NumberOfVertices2, NumberOfEdges2, seed, maxWeight);
+    printf("\nGRAPH 2: %d vertices, %d edges\n", NumberOfVertices2, NumberOfEdges2);
+    start = clock();
+    Prim(graph2);
+    end = clock();
+    cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("Execution time: %.6lf seconds\n", cpu_time_used);
+    freeGraph(graph2);
+
+    // GRAPH 3
+    int NumberOfVertices3 = 15;
+    int NumberOfEdges3 = 20;
+    srand(seed);
+    struct Graph *graph3 = createGraph(NumberOfVertices3);
+    generateRandomGraph(graph3, NumberOfVertices3, NumberOfEdges3, seed, maxWeight);
+    printf("\nGRAPH 3: %d vertices, %d edges\n", NumberOfVertices3, NumberOfEdges3);
+    start = clock();
+    Prim(graph3);
+    end = clock();
+    cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("Execution time: %.6lf seconds\n", cpu_time_used);
+    freeGraph(graph3);
+
+    // GRAPH 4
+    int NumberOfVertices4 = 20;
+    int NumberOfEdges4 = 30;
+    srand(seed);
+    struct Graph *graph4 = createGraph(NumberOfVertices4);
+    generateRandomGraph(graph4, NumberOfVertices4, NumberOfEdges4, seed, maxWeight);
+    printf("\nGRAPH 4: %d vertices, %d edges\n", NumberOfVertices4, NumberOfEdges4);
+    start = clock();
+    Prim(graph4);
+    end = clock();
+    cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("Execution time: %.6lf seconds\n", cpu_time_used);
+    freeGraph(graph4);
+
     return 0;
 }
+
 
 // Create node
 struct node *createNode(int v, int weight)
