@@ -5,9 +5,9 @@
 #include <limits.h>
 #include <time.h>
 
-#define MAX_EDGES 1000
+#define MAX_EDGES 10000 
 
-/* Δομές */
+//Structs
 
 struct node {
     int vertex;
@@ -27,28 +27,40 @@ struct Graph {
     int edgeCount;
 };
 
+//Function declarations 
+
 struct node *createNode(int v, int weight);
-void addAdjEdge(struct Graph *graph, int src, int dest, int weight);
 void removeAdjEdge(struct Graph *graph, int src, int dest);
 struct Graph *createGraph(int vertices);
 void addEdge(struct Graph *graph, int src, int dest, int weight);
-void dfsConn(struct Graph *graph, int v);
+void dfs(struct Graph *graph, int v);
 bool isConnected(struct Graph *graph);
 int compareEdges(const void *a, const void *b);
 void freeGraph(struct Graph *graph);
 void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOfEdges, unsigned int seed, int maxWeight);
 void printGraph(struct Graph *graph);
 
-/* --- reverse‐delete MST --- */
 
-/**
- * Υλοποιεί τον αλγόριθμο Reverse‐Delete για MST:
- * Ταξινομεί τις ακμές κατά φθίνουσα βαρών. Στη συνέχεια, βρόχος:
- *   α) Αφαιρεί προσωρινά την ακμή (u,v) από τις adjacency‐lists.
- *   β) Καλεί isConnected.  Αν επιστρέψει false, επαναφέρει την ακμή
- *      και την κρατά στο MST. Διαφορετικά, την αφήνει κομμένη.
- */
+// Reverse‐delete algorithm for minimum spanning tree
+
 void reverseDeleteMST(struct Graph *graph) {
+    int idx = 0;
+    // Build edges[] array from adjacency lists (each undirected edge once)
+    for (int u = 0; u < graph->NumberOfVertices; u++) {
+        for (struct node *p = graph->AdjacencyList[u]; p; p = p->next) {
+            int v = p->vertex;
+            if (u < v) {
+                graph->edges[idx].u = u;
+                graph->edges[idx].v = v;
+                graph->edges[idx].weight = p->weight;
+                idx++;
+                if (idx >= MAX_EDGES) break;
+            }
+        }
+        if (idx >= MAX_EDGES) break;
+    }
+    graph->edgeCount = idx;
+
     qsort(graph->edges, graph->edgeCount, sizeof(struct Edge), compareEdges);
 
     int totalWeight = 0;
@@ -58,41 +70,40 @@ void reverseDeleteMST(struct Graph *graph) {
         int v = graph->edges[i].v;
         int w = graph->edges[i].weight;
 
-        /* Προσωρινή αφαίρεση της ακμής από τις δύο λίστες */
+        // Temporarily remove edge u–v
         removeAdjEdge(graph, u, v);
         removeAdjEdge(graph, v, u);
 
         if (!isConnected(graph)) {
-            /* Αν αποσυνδεθεί, επαναφέρουμε στο MST */
-            addAdjEdge(graph, u, v, w);
-            addAdjEdge(graph, v, u, w);
+            // If disconnected, restore edge
+            struct node *n1 = createNode(v, w);
+            n1->next = graph->AdjacencyList[u];
+            graph->AdjacencyList[u] = n1;
+            struct node *n2 = createNode(u, w);
+            n2->next = graph->AdjacencyList[v];
+            graph->AdjacencyList[v] = n2;
+
             totalWeight += w;
             printf("%2d - %2d    %d\n", u, v, w);
         }
-        /* Διαφορετικά την αφήνουμε τελείως κομμένη (remote) */
+        // Otherwise leave it removed
     }
     printf("Total weight of MST = %d\n", totalWeight);
 }
 
-
-
-/* --- κύριο πρόγραμμα που συγκρίνει μετράει και reverse‐delete --- */
+// Main program 
 
 int main(void) {
-    /* Παράμετροι τυχαίου γράφου */
-    int NumberOfVertices = 10;   // Αριθμός κορυφών
-    int NumberOfEdges    = 15;   // Σύνολο ακμών
-    unsigned int seed    = 20;      // Seed για rand()
-    int maxWeight        = 20;      // Μέγιστο βάρος ακμής
+    int NumberOfVertices = 10;
+    int NumberOfEdges    = 15;
+    unsigned int seed    = 20;
+    int maxWeight        = 20;
 
-    /* Δημιουργία κενού γράφου */
     struct Graph *graph = createGraph(NumberOfVertices);
 
-    /* Γέμισμα με τυχαίες ακμές και εκτύπωση */
     generateRandomGraph(graph, NumberOfVertices, NumberOfEdges, seed, maxWeight);
     printGraph(graph);
 
-    /* Εκτέλεση Reverse‐Delete MST και μέτρηση χρόνου */
     clock_t start = clock();
     reverseDeleteMST(graph);
     clock_t end = clock();
@@ -104,11 +115,8 @@ int main(void) {
     return 0;
 }
 
-/* --- adjacency‐list helper functions --- */
 
-/**
- * Δημιουργεί έναν κόμβο λίστας γειτόνων με κορυφή v και βάρος weight.
- */
+// Create a new adjacency‐list node 
 struct node *createNode(int v, int weight) {
     struct node *newNode = malloc(sizeof(struct node));
     newNode->vertex = v;
@@ -117,18 +125,7 @@ struct node *createNode(int v, int weight) {
     return newNode;
 }
 
-/**
- * Προσθέτει κατευθυνόμενη ακμή src→dest με βάρος weight στην adjacency‐list.
- */
-void addAdjEdge(struct Graph *graph, int src, int dest, int weight) {
-    struct node *n = createNode(dest, weight);
-    n->next = graph->AdjacencyList[src];
-    graph->AdjacencyList[src] = n;
-}
-
-/**
- * Αφαιρεί την πρώτη εμφάνιση ακμής src→dest από την adjacency‐list.
- */
+//Delete the edge from src to dest in the adjacency list if it exists.
 void removeAdjEdge(struct Graph *graph, int src, int dest) {
     struct node *p = graph->AdjacencyList[src];
     struct node *prev = NULL;
@@ -148,74 +145,61 @@ void removeAdjEdge(struct Graph *graph, int src, int dest) {
     }
 }
 
-/* --- graph construction & utilities --- */
-
-/**
- * Δημιουργεί κενό γράφο με δοθείσες κορυφές, χωρίς ακμές.
- */
+// Create an empty graph with the given vertices 
 struct Graph *createGraph(int vertices) {
     struct Graph *graph = malloc(sizeof(struct Graph));
     graph->NumberOfVertices = vertices;
-    graph->AdjacencyList = calloc(vertices, sizeof(struct node *));
-    graph->visited  = calloc(vertices, sizeof(int));
-    graph->edges     = malloc(MAX_EDGES * sizeof(struct Edge));
+    graph->AdjacencyList = malloc(vertices * sizeof(struct node *));
+    graph->visited = malloc(vertices * sizeof(int));
+    graph->edges = malloc(MAX_EDGES * sizeof(struct Edge));
     graph->edgeCount = 0;
+    for (int i = 0; i < vertices; i++) {
+        graph->AdjacencyList[i] = NULL;
+        graph->visited[i] = 0;
+    }
     return graph;
 }
 
-/**
- * Προσθέτει ΜΗ‐ΠΡΟΣΑΝΑΤΟΛΙΣΜΕΝΗ ακμή src–dest με βάρος weight:
- * 1) Καταγράφει την (src,dest,weight) στον πίνακα edges[] (μία φορά).
- * 2) Καλεί addAdjEdge δύο φορές για src→dest και dest→src.
- */
+// Add undirected edge by inserting nodes in both lists 
 void addEdge(struct Graph *graph, int src, int dest, int weight) {
-    if (graph->edgeCount < MAX_EDGES) {
-        graph->edges[graph->edgeCount].u = src;
-        graph->edges[graph->edgeCount].v = dest;
-        graph->edges[graph->edgeCount].weight = weight;
-        graph->edgeCount++;
-    }
-    addAdjEdge(graph, src, dest, weight);
-    addAdjEdge(graph, dest, src, weight);
+    struct node *newNode = createNode(dest, weight);
+    newNode->next = graph->AdjacencyList[src];
+    graph->AdjacencyList[src] = newNode;
+
+    newNode = createNode(src, weight);
+    newNode->next = graph->AdjacencyList[dest];
+    graph->AdjacencyList[dest] = newNode;
 }
 
-/**
- * DFS για να σηματοδοτήσει (visited=1) όλες τις κορυφές προσβάσιμες από v.
- */
-void dfsConn(struct Graph *graph, int v) {
+// DFS to mark reachable vertices from v 
+void dfs(struct Graph *graph, int v) {
     graph->visited[v] = 1;
     for (struct node *p = graph->AdjacencyList[v]; p; p = p->next) {
         if (!graph->visited[p->vertex]) {
-            dfsConn(graph, p->vertex);
+            dfs(graph, p->vertex);
         }
     }
 }
 
-/**
- * Ελέγχει αν ο γράφος είναι συνδεδεμένος (κάνοντας DFS από κορυφή 0).
- */
+// Check if graph is connected via DFS from vertex 0 
 bool isConnected(struct Graph *graph) {
     for (int i = 0; i < graph->NumberOfVertices; i++)
         graph->visited[i] = 0;
-    dfsConn(graph, 0);
+    dfs(graph, 0);
     for (int i = 0; i < graph->NumberOfVertices; i++)
         if (!graph->visited[i])
             return false;
     return true;
 }
 
-/**
- * Συνάρτηση σύγκρισης για qsort: ταξινόμηση κατά φθίνουσα βαρών.
- */
+// Compare edges by descending weight for qsort 
 int compareEdges(const void *a, const void *b) {
     struct Edge *e1 = (struct Edge*)a;
     struct Edge *e2 = (struct Edge*)b;
     return e2->weight - e1->weight;
 }
 
-/**
- * Απελευθερώνει όλη τη δυναμική μνήμη του γράφου.
- */
+//Free Graph
 void freeGraph(struct Graph *graph) {
     for (int i = 0; i < graph->NumberOfVertices; i++) {
         struct node *p = graph->AdjacencyList[i];
@@ -231,24 +215,17 @@ void freeGraph(struct Graph *graph) {
     free(graph);
 }
 
-/* --- generateRandomGraph + printGraph από τον Prim κώδικα --- */
 
-/**
- * Γεννάει τυχαίο γράφο με NumberOfVertices κορυφές και NumberOfEdges ακμές.
- * Διασφαλίζει αρχικά spanning‐tree + επιπλέον ακμές, χρησιμοποιώντας rand() με seed.
- * Καλεί addEdge για να ενημερώσει και τις adjacency‐lists και τον πίνακα edges[].
- */
+// Generate random connected graph
 void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOfEdges, unsigned int seed, int maxWeight) {
     srand(seed);
 
-    /* 1. Φτιάχνουμε ένα τυχαίο spanning tree ώστε να είναι συνδεδεμένος ο γράφος */
     for (int i = 1; i < NumberOfVertices; i++) {
-        int j = rand() % i;                // j ∈ [0, i−1]
+        int j = rand() % i;
         int weight = rand() % maxWeight + 1;
         addEdge(graph, i, j, weight);
     }
 
-    /* 2. Προσθέτουμε τις υπόλοιπες ακμές τυχαία, χωρίς διπλοεγγραφές */
     int edgesSoFar = NumberOfVertices - 1;
     int remaining = NumberOfEdges - edgesSoFar;
     if (remaining < 0) remaining = 0;
@@ -260,7 +237,6 @@ void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOf
         int v = rand() % NumberOfVertices;
         if (u == v) continue;
 
-        /* Έλεγχος αν ήδη υπάρχει ακμή u–v */
         struct node *temp = graph->AdjacencyList[u];
         bool EdgeInGraph = false;
         while (temp) {
@@ -279,9 +255,7 @@ void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOf
     }
 }
 
-/**
- * Εκτυπώνει τον γράφο ως adjacency‐list: σε κάθε γραμμή i, όλοι οι γείτονες.
- */
+// Print the Graph
 void printGraph(struct Graph *graph) {
     printf("Graph adjacency list:\n");
     for (int i = 0; i < graph->NumberOfVertices; i++) {
