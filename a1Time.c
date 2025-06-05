@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define SIZE INT_MAX // Or dynamically allocate
+#define SIZE 10000
 
 // Structs
 struct node
