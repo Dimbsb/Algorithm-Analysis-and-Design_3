@@ -1,3 +1,4 @@
+// RDA-2010-2037
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -157,7 +158,7 @@ int main()
 }
 
 
-// Create a new adjacency‐list node 
+// Create node
 struct node *createNode(int v, int weight) {
     struct node *newNode = malloc(sizeof(struct node));
     newNode->vertex = v;
@@ -166,7 +167,7 @@ struct node *createNode(int v, int weight) {
     return newNode;
 }
 
-//Delete the edge from src to dest in the adjacency list if it exists.
+//Delete the edge from src to dest in the adjacency list.
 void removeAdjEdge(struct Graph *graph, int src, int dest) {
     struct node *p = graph->AdjacencyList[src];
     struct node *prev = NULL;
@@ -186,7 +187,7 @@ void removeAdjEdge(struct Graph *graph, int src, int dest) {
     }
 }
 
-// Create an empty graph with the given vertices 
+// CreateGraph
 struct Graph *createGraph(int vertices) {
     struct Graph *graph = malloc(sizeof(struct Graph));
     graph->NumberOfVertices = vertices;
@@ -201,7 +202,7 @@ struct Graph *createGraph(int vertices) {
     return graph;
 }
 
-// Add undirected edge by inserting nodes in both lists 
+// AddEdge
 void addEdge(struct Graph *graph, int src, int dest, int weight) {
     struct node *newNode = createNode(dest, weight);
     newNode->next = graph->AdjacencyList[src];
@@ -222,7 +223,7 @@ void dfs(struct Graph *graph, int v) {
     }
 }
 
-// Check if graph is connected via DFS from vertex 0 
+// Check if graph is connected using DFS from vertex 0 
 bool isConnected(struct Graph *graph) {
     for (int i = 0; i < graph->NumberOfVertices; i++)
         graph->visited[i] = 0;
@@ -233,7 +234,7 @@ bool isConnected(struct Graph *graph) {
     return true;
 }
 
-// Compare edges by descending weight for qsort 
+// Compare edges for qsort
 int compareEdges(const void *a, const void *b) {
     struct Edge *e1 = (struct Edge*)a;
     struct Edge *e2 = (struct Edge*)b;
@@ -257,41 +258,46 @@ void freeGraph(struct Graph *graph) {
 }
 
 
-// Generate random connected graph
-void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOfEdges, unsigned int seed, int maxWeight) {
-    srand(seed);
-
-    for (int i = 1; i < NumberOfVertices; i++) {
-        int j = rand() % i;
+// Generate random graph
+void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOfEdges, unsigned int seed, int maxWeight)
+{
+ 
+    for (int i = 1; i < NumberOfVertices; i++)
+    {
+        int j = rand() % i;  
         int weight = rand() % maxWeight + 1;
         addEdge(graph, i, j, weight);
     }
 
-    int edgesSoFar = NumberOfVertices - 1;
-    int remaining = NumberOfEdges - edgesSoFar;
-    if (remaining < 0) remaining = 0;
-    if (NumberOfEdges > MAX_EDGES) remaining = MAX_EDGES - edgesSoFar;
-    int added = 0;
+    int RemainingEdges = NumberOfEdges - (NumberOfVertices - 1);
+    int AddEdgeToGraph = 0;
 
-    while (added < remaining) {
+    while (AddEdgeToGraph < RemainingEdges)
+    {
         int u = rand() % NumberOfVertices;
         int v = rand() % NumberOfVertices;
-        if (u == v) continue;
+
+        if (u == v) {
+            continue;
+        }
 
         struct node *temp = graph->AdjacencyList[u];
         bool EdgeInGraph = false;
-        while (temp) {
-            if (temp->vertex == v) {
+        while (temp)
+        {
+            if (temp->vertex == v)
+            {
                 EdgeInGraph = true;
                 break;
             }
             temp = temp->next;
         }
 
-        if (!EdgeInGraph) {
+        if (!EdgeInGraph)
+        {
             int weight = rand() % maxWeight + 1;
             addEdge(graph, u, v, weight);
-            added++;
+            AddEdgeToGraph++;
         }
     }
 }
