@@ -27,7 +27,6 @@ struct Graph {
 };
 
 //Function declarations 
-
 struct node *createNode(int v, int weight);
 void removeAdjEdge(struct Graph *graph, int src, int dest);
 struct Graph *createGraph(int vertices);
@@ -38,10 +37,10 @@ int compareEdges(const void *a, const void *b);
 void freeGraph(struct Graph *graph);
 void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOfEdges, unsigned int seed, int maxWeight);
 
-// Reverse‐delete algorithm for minimum spanning tree
+// Reverse‐delete algorithm  
 void reverseDeleteMST(struct Graph *graph) {
     int idx = 0;
-    // Build edges[] array from adjacency lists (each undirected edge once)
+     
     for (int u = 0; u < graph->NumberOfVertices; u++) {
         for (struct node *p = graph->AdjacencyList[u]; p; p = p->next) {
             int v = p->vertex;
@@ -66,12 +65,12 @@ void reverseDeleteMST(struct Graph *graph) {
         int v = graph->edges[i].v;
         int w = graph->edges[i].weight;
 
-        // Temporarily remove edge u–v
+        
         removeAdjEdge(graph, u, v);
         removeAdjEdge(graph, v, u);
 
         if (!isConnected(graph)) {
-            // If disconnected, restore edge
+             
             struct node *n1 = createNode(v, w);
             n1->next = graph->AdjacencyList[u];
             graph->AdjacencyList[u] = n1;
@@ -82,7 +81,7 @@ void reverseDeleteMST(struct Graph *graph) {
             totalWeight += w;
             printf("%2d - %2d    %d\n", u, v, w);
         }
-        // Otherwise leave it removed
+         
     }
     printf("Total weight of MST = %d\n", totalWeight);
 }
@@ -105,7 +104,6 @@ int main()
     struct Graph *graph1 = createGraph(NumberOfVertices1);
     generateRandomGraph(graph1, NumberOfVertices1, NumberOfEdges1, seed, maxWeight);
     printf("\nGRAPH 1: %d vertices, %d edges\n", NumberOfVertices1, NumberOfEdges1);
-    //printGraph(graph1);
     start = clock();
     reverseDeleteMST(graph1);
     end = clock();
@@ -120,7 +118,6 @@ int main()
     struct Graph *graph2 = createGraph(NumberOfVertices2);
     generateRandomGraph(graph2, NumberOfVertices2, NumberOfEdges2, seed, maxWeight);
     printf("\nGRAPH 2: %d vertices, %d edges\n", NumberOfVertices2, NumberOfEdges2);
-    //printGraph(graph2);
     start = clock();
     reverseDeleteMST(graph2);
     end = clock();
@@ -135,7 +132,6 @@ int main()
     struct Graph *graph3 = createGraph(NumberOfVertices3);
     generateRandomGraph(graph3, NumberOfVertices3, NumberOfEdges3, seed, maxWeight);
     printf("\nGRAPH 3: %d vertices, %d edges\n", NumberOfVertices3, NumberOfEdges3);
-    //printGraph(graph3);
     start = clock();
     reverseDeleteMST(graph3);
     end = clock();
@@ -150,7 +146,6 @@ int main()
     struct Graph *graph4 = createGraph(NumberOfVertices4);
     generateRandomGraph(graph4, NumberOfVertices4, NumberOfEdges4, seed, maxWeight);
     printf("\nGRAPH 4: %d vertices, %d edges\n", NumberOfVertices4, NumberOfEdges4);
-    //printGraph(graph4);
     start = clock();
     reverseDeleteMST(graph4);
     end = clock();

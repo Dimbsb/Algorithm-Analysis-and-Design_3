@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 
+// Structs
 struct node
 {
     int vertex;

@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define SIZE INT_MAX // Or dynamically allocate
+#define SIZE 10000
 
 // Structs
 struct node
@@ -41,7 +41,6 @@ void generateRandomGraph(struct Graph *graph, int NumberOfVertices, int NumberOf
 void printGraph(struct Graph *graph);
 void freeGraph(struct Graph *graph);
 void freeQueue(struct queue *q);
-// void printQueue(struct queue *q);
 
 // Prim algorithm
 void Prim(struct Graph *graph)
@@ -348,18 +347,3 @@ void freeQueue(struct queue *q)
 }
 
 
-/*
-void printQueue(struct queue *q)
-{
-    printf("Queue: ");
-    if (q->front == -1)
-    {
-        printf("empty");
-    }
-    else
-    {
-        for (int i = q->front; i <= q->rear; i++)
-            printf("%d ", q->items[i]);
-    }
-    printf("\n");
-}*/
